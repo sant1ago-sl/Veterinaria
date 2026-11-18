@@ -1,6 +1,9 @@
-# Veterinaria API (Semana 13)
+# Veterinaria API (Semanas 13 y 14)
 
 API REST en **ASP.NET Core (.NET 10)** para gestionar dueños y mascotas de una veterinaria, construida en **4 capas** con Entity Framework Core, AutoMapper y SQL Server.
+
+- **Semana 13:** API en capas con DTOs y AutoMapper (secciones 1 a 9).
+- **Semana 14:** autenticación con JWT, registro e inicio de sesión, roles `Recepcionista` y `Veterinario` y endpoints protegidos (sección 10).
 
 ---
 
@@ -19,6 +22,9 @@ API REST en **ASP.NET Core (.NET 10)** para gestionar dueños y mascotas de una 
 8. [Mapeos (MappingProfile)](#mapeos)
 9. [Seguridad: sin credenciales en el repositorio](#seguridad)
 10. [Semana 14: autenticación JWT](#jwt)
+   - [Configuración y roles](#jwt)
+   - [Matriz de permisos](#jwt-matriz)
+   - [Códigos de respuesta](#jwt-codigos)
 
 ---
 
@@ -40,7 +46,7 @@ El repositorio no contiene contraseñas ni cadenas de conexión con credenciales
 <a id="script-sql"></a>
 ## 2. Script SQL de la base de datos
 
-El script está incluido en el repositorio: [`Database/VeterinariaDb.sql`](Database/VeterinariaDb.sql)
+El script está incluido en el repositorio: [`Database/VeterinariaDb.sql`](Database/VeterinariaDb.sql) (semana 13). Para la semana 14 se agrega [`Database/UsuariosDb.sql`](Database/UsuariosDb.sql), que crea la tabla `Usuarios` con un usuario por rol.
 
 Qué hace:
 
@@ -237,6 +243,7 @@ No se usa `ReverseMap()`: los DTOs de entrada y lectura son distintos, un mapeo 
 
 **Token:** claims `sub` (id), `email`, `role`, `jti`, `nbf`, `exp`, `iss`, `aud`; HS256; expira según `ExpireMinutes` (60 min).
 
+<a id="jwt-matriz"></a>
 #### Matriz de permisos
 | Endpoint | Sin token | Recepcionista | Veterinario |
 |---|---|---|---|
@@ -250,6 +257,7 @@ No se usa `ReverseMap()`: los DTOs de entrada y lectura son distintos, un mapeo 
 
 Pruebas: `Veterinaria.Api/Veterinaria.Api.http` o Swagger (botón **Authorize**, pega solo el token).
 
+<a id="jwt-codigos"></a>
 #### Códigos de respuesta
 | Código | Cuándo |
 |---|---|
