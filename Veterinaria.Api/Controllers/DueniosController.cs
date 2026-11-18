@@ -1,3 +1,4 @@
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Veterinaria.Entidades.Dtos;
 using Veterinaria.Negocio.Excepciones;
@@ -6,6 +7,7 @@ using Veterinaria.Negocio.Servicios;
 namespace Veterinaria.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class DueniosController : ControllerBase
 {
@@ -18,13 +20,14 @@ public class DueniosController : ControllerBase
         _mascotaService = mascotaService;
     }
 
-    /// <summary>Lista dueños; filtro opcional por nombre (?nombre=).</summary>
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(List<DuenioDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Get([FromQuery] string? nombre) =>
         Ok(await _service.ObtenerTodosAsync(nombre));
 
     [HttpGet("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(DuenioDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(int id)
@@ -33,8 +36,8 @@ public class DueniosController : ControllerBase
         return duenio is null ? NotFound() : Ok(duenio);
     }
 
-    /// <summary>Ruta anidada: mascotas de un dueño.</summary>
     [HttpGet("{id:int}/mascotas")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(List<MascotaDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetMascotas(int id)
@@ -43,7 +46,10 @@ public class DueniosController : ControllerBase
         return mascotas is null ? NotFound() : Ok(mascotas);
     }
 
+    [Authorize(Roles = AuthService.RolRecepcionista)]
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(DuenioDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
@@ -60,7 +66,10 @@ public class DueniosController : ControllerBase
         }
     }
 
+    [Authorize(Roles = AuthService.RolRecepcionista)]
     [HttpPut("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -77,7 +86,10 @@ public class DueniosController : ControllerBase
         }
     }
 
+    [Authorize(Roles = AuthService.RolRecepcionista)]
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]

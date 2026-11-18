@@ -24,7 +24,6 @@ public class MascotaService : IMascotaService
     public async Task<List<MascotaDto>> ObtenerFiltradoAsync(string? especie, int? duenioId, int? edadMin, int? edadMax) =>
         _mapper.Map<List<MascotaDto>>(await _repo.ObtenerFiltradoAsync(especie, duenioId, edadMin, edadMax));
 
-    // null si el dueño no existe
     public async Task<List<MascotaDto>?> ObtenerPorDuenioAsync(int duenioId)
     {
         if (await _duenioRepo.ObtenerPorIdAsync(duenioId) is null) return null;
@@ -37,16 +36,13 @@ public class MascotaService : IMascotaService
         return mascota is null ? null : _mapper.Map<MascotaDto>(mascota);
     }
 
-    // null si el dueño no existe
     public async Task<MascotaDto?> CrearAsync(MascotaCrearDto dto)
     {
         if (await _duenioRepo.ObtenerPorIdAsync(dto.DuenioId) is null) return null;
 
-        // Regla 1: máximo de mascotas por dueño
         if (await _repo.ContarPorDuenioAsync(dto.DuenioId) >= MaxMascotasPorDuenio)
             throw new ReglaNegocioException($"Un dueño no puede tener más de {MaxMascotasPorDuenio} mascotas.");
 
-        // Regla 2: microchip único
         if (!string.IsNullOrWhiteSpace(dto.Microchip) && await _repo.ExisteMicrochipAsync(dto.Microchip))
             throw new ReglaNegocioException($"Ya existe una mascota con el microchip '{dto.Microchip}'.");
 

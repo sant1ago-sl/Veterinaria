@@ -1,3 +1,4 @@
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Veterinaria.Entidades.Dtos;
 using Veterinaria.Negocio.Excepciones;
@@ -6,6 +7,7 @@ using Veterinaria.Negocio.Servicios;
 namespace Veterinaria.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class MascotasController : ControllerBase
 {
@@ -13,13 +15,14 @@ public class MascotasController : ControllerBase
 
     public MascotasController(IMascotaService service) => _service = service;
 
-    /// <summary>Lista mascotas con filtros opcionales: especie, duenioId, edadMin, edadMax.</summary>
+    [AllowAnonymous]
     [HttpGet]
     [ProducesResponseType(typeof(List<MascotaDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Get([FromQuery] string? especie, [FromQuery] int? duenioId,
         [FromQuery] int? edadMin, [FromQuery] int? edadMax) =>
         Ok(await _service.ObtenerFiltradoAsync(especie, duenioId, edadMin, edadMax));
 
+    [AllowAnonymous]
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(MascotaDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -29,7 +32,10 @@ public class MascotasController : ControllerBase
         return mascota is null ? NotFound() : Ok(mascota);
     }
 
+    [Authorize(Roles = AuthService.RolRecepcionista + "," + AuthService.RolVeterinario)]
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(MascotaDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -48,7 +54,10 @@ public class MascotasController : ControllerBase
         }
     }
 
+    [Authorize(Roles = AuthService.RolVeterinario)]
     [HttpPut("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -65,7 +74,10 @@ public class MascotasController : ControllerBase
         }
     }
 
+    [Authorize(Roles = AuthService.RolVeterinario)]
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id) =>

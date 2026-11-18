@@ -28,7 +28,6 @@ public class DuenioService : IDuenioService
 
     public async Task<DuenioDto> CrearAsync(DuenioCrearDto dto)
     {
-        // Regla 1: el email del dueño debe ser único
         if (await _repo.ExisteEmailAsync(dto.Email))
             throw new ReglaNegocioException($"Ya existe un dueño con el email '{dto.Email}'.");
 
@@ -56,7 +55,6 @@ public class DuenioService : IDuenioService
         var duenio = await _repo.ObtenerPorIdAsync(id);
         if (duenio is null) return false;
 
-        // Regla 2: no se puede eliminar un dueño con mascotas registradas
         if (duenio.Mascotas.Any())
             throw new ReglaNegocioException("No se puede eliminar un dueño que tiene mascotas registradas.");
 

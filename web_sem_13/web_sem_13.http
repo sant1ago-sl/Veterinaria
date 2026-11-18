@@ -1,6 +1,0 @@
-@web_sem_13_HostAddress = http://localhost:5187
-
-GET {{web_sem_13_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

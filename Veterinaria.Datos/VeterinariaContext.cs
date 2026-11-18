@@ -16,6 +16,8 @@ public partial class VeterinariaContext : DbContext
 
     public virtual DbSet<Mascota> Mascotas { get; set; }
 
+    public virtual DbSet<Usuario> Usuarios { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Duenio>(entity =>
@@ -48,6 +50,17 @@ public partial class VeterinariaContext : DbContext
                 .HasForeignKey(d => d.DuenioId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Mascotas_Duenios");
+        });
+
+        modelBuilder.Entity<Usuario>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.Correo, "UX_Usuarios_Correo").IsUnique();
+
+            entity.Property(e => e.Correo).HasMaxLength(150);
+            entity.Property(e => e.ClaveHash).HasMaxLength(100);
+            entity.Property(e => e.Rol).HasMaxLength(30);
         });
 
         OnModelCreatingPartial(modelBuilder);

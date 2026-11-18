@@ -1,6 +1,110 @@
-@Veterinaria.Api_HostAddress = http://localhost:5208
-
-GET {{Veterinaria.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+@host = http://localhost:5208
+@tokenRecep = PEGA_TOKEN_RECEPCIONISTA
+@tokenVet = PEGA_TOKEN_VETERINARIO
 
 ###
+POST {{host}}/api/auth/registro
+Content-Type: application/json
+
+{ "correo": "nuevo@veterinaria.com", "clave": "Clave1234!" }
+
+###
+POST {{host}}/api/auth/registro
+Content-Type: application/json
+
+{ "correo": "recepcion@veterinaria.com", "clave": "Clave1234!" }
+
+###
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "correo": "recepcion@veterinaria.com", "clave": "Recep123!" }
+
+###
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "correo": "vet@veterinaria.com", "clave": "Vet12345!" }
+
+###
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "correo": "recepcion@veterinaria.com", "clave": "incorrecta" }
+
+###
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "correo": "no-es-correo", "clave": "" }
+
+###
+GET {{host}}/api/auth/perfil
+Authorization: Bearer {{tokenRecep}}
+
+###
+GET {{host}}/api/auth/perfil
+
+###
+GET {{host}}/api/mascotas
+
+###
+GET {{host}}/api/duenios
+
+###
+GET {{host}}/api/duenios
+Authorization: Bearer {{tokenVet}}
+
+###
+POST {{host}}/api/duenios
+Authorization: Bearer {{tokenRecep}}
+Content-Type: application/json
+
+{ "nombre": "Pedro Salas", "email": "pedro@mail.com", "telefono": "999111222" }
+
+###
+POST {{host}}/api/duenios
+Authorization: Bearer {{tokenVet}}
+Content-Type: application/json
+
+{ "nombre": "Otro", "email": "otro@mail.com" }
+
+###
+POST {{host}}/api/duenios
+Authorization: Bearer {{tokenRecep}}
+Content-Type: application/json
+
+{ "nombre": "Ana", "email": "ana.torres@mail.com" }
+
+###
+POST {{host}}/api/duenios
+Authorization: Bearer {{tokenRecep}}
+Content-Type: application/json
+
+{ "nombre": "", "email": "x" }
+
+###
+GET {{host}}/api/duenios/9999
+Authorization: Bearer {{tokenRecep}}
+
+###
+PUT {{host}}/api/mascotas/1
+Authorization: Bearer {{tokenVet}}
+Content-Type: application/json
+
+{ "nombre": "Firulais", "especie": "Perro", "raza": "Labrador", "edad": 6, "peso": 29.0, "microchip": "MC-0001" }
+
+###
+PUT {{host}}/api/mascotas/1
+Authorization: Bearer {{tokenRecep}}
+Content-Type: application/json
+
+{ "nombre": "Firulais", "especie": "Perro", "raza": "Labrador", "edad": 6, "peso": 29.0, "microchip": "MC-0001" }
+
+###
+DELETE {{host}}/api/duenios/4
+Authorization: Bearer {{tokenRecep}}
+
+###
+DELETE {{host}}/api/duenios/1
+Authorization: Bearer {{tokenRecep}}

@@ -18,6 +18,7 @@ API REST en **ASP.NET Core (.NET 10)** para gestionar dueños y mascotas de una 
 7. [Reglas de negocio](#reglas-negocio)
 8. [Mapeos (MappingProfile)](#mapeos)
 9. [Seguridad: sin credenciales en el repositorio](#seguridad)
+10. [Semana 14: autenticación JWT](#jwt)
 
 ---
 
@@ -221,5 +222,54 @@ No se usa `ReverseMap()`: los DTOs de entrada y lectura son distintos, un mapeo 
   ```
 - Alternativa: la variable de entorno `ConnectionStrings__VeterinariaDb`.
 - La base de datos se crea con el script SQL incluido, no con datos privados.
+
+[↑ Volver al índice](#indice)
+
+---
+
+<a id="jwt"></a>
+## 10. Semana 14: autenticación JWT
+**Configuración (la clave NO se sube):** `appsettings.json` trae Issuer, Audience y ExpireMinutes. La clave (`Jwt:Key`, mínimo 32 caracteres) va en `Veterinaria.Api/appsettings.Local.json` (ignorado por Git; copia `appsettings.Local.example.json`) o en la variable de entorno `Jwt__Key`.
+
+**Roles:** `Recepcionista` (atiende a los dueños y registra mascotas) y `Veterinario` (actualiza y elimina datos clínicos de las mascotas). El registro asigna el rol en el servidor (`Recepcionista`); el cliente nunca lo envía. Para promover a alguien: `UPDATE Usuarios SET Rol='Veterinario' WHERE Correo='...'`.
+
+**Usuarios de prueba (`Database/UsuariosDb.sql`):** `recepcion@veterinaria.com` / `Recep123!` (Recepcionista) · `vet@veterinaria.com` / `Vet12345!` (Veterinario).
+
+**Token:** claims `sub` (id), `email`, `role`, `jti`, `nbf`, `exp`, `iss`, `aud`; HS256; expira según `ExpireMinutes` (60 min).
+
+#### Matriz de permisos
+| Endpoint | Sin token | Recepcionista | Veterinario |
+|---|---|---|---|
+| POST /api/auth/registro · POST /api/auth/login | Sí | Sí | Sí |
+| GET /api/auth/perfil | No (401) | Sí | Sí |
+| GET /api/mascotas · GET /api/mascotas/{id} | Sí | Sí | Sí |
+| GET /api/duenios · /{id} · /{id}/mascotas | No (401) | Sí | Sí |
+| POST · PUT · DELETE /api/duenios | No (401) | Sí | No (403) |
+| POST /api/mascotas | No (401) | Sí | Sí |
+| PUT · DELETE /api/mascotas/{id} | No (401) | No (403) | Sí |
+
+Pruebas: `Veterinaria.Api/Veterinaria.Api.http` o Swagger (botón **Authorize**, pega solo el token).
+
+#### Códigos de respuesta
+| Código | Cuándo |
+|---|---|
+| 200 / 201 / 204 | GET y login correctos / POST correcto (incluye registro) / PUT y DELETE correctos |
+| 400 | Datos inválidos (validaciones de los DTOs) |
+| 401 | Login con credenciales inválidas, o petición sin token a un endpoint protegido |
+| 403 | Token válido pero sin el rol que exige el endpoint |
+| 404 | El recurso no existe |
+| 409 | Regla de negocio incumplida (correo, email o microchip repetido, dueño con mascotas, máximo 5 mascotas) |
+
+#### Códigos de respuesta
+| Código | Cuándo |
+|---|---|
+| 200 / 201 / 204 | GET y login correctos / POST correcto (incluye registro) / PUT y DELETE correctos |
+| 400 | Datos inválidos (validaciones de los DTOs) |
+| 401 | Login con credenciales inválidas, o petición sin token a un endpoint protegido |
+| 403 | Token válido pero sin el rol que exige el endpoint |
+| 404 | El recurso no existe |
+| 409 | Regla de negocio incumplida |
+
+Script SQL de usuarios: [`Database/UsuariosDb.sql`](Database/UsuariosDb.sql). La clave del token nunca se sube al repositorio.
 
 [↑ Volver al índice](#indice)
